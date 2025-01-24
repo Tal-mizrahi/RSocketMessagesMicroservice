@@ -3,8 +3,9 @@ package il.ac.afeka.cloud.rsocketmessagesmicroservice.boundaries
 class TargetBoundary(
 
     var target: String?,
-    var page: Int,
-    var size: Int
+    var page: Int = 0,
+    var size: Int = 10
+
 
 ) {
 

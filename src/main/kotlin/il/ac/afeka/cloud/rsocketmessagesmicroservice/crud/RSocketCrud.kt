@@ -9,4 +9,7 @@ import reactor.core.publisher.Flux
 interface RSocketCrud: ReactiveMongoRepository<MessageEntity, String> {
     fun findAllByIdNotNull(page: Pageable): Flux<MessageEntity>
     fun findAllByTarget(@Param("target") target: String, page: Pageable): Flux<MessageEntity>
+    fun findAllByTargetAndSenderAndUrgentIsTrue(@Param("target") target: String,
+                                                @Param("sender") sender: String,
+                                                page: Pageable): Flux<MessageEntity>
 }

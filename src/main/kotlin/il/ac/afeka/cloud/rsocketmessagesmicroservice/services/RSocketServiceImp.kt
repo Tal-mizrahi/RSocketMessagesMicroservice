@@ -1,6 +1,7 @@
 package il.ac.afeka.cloud.rsocketmessagesmicroservice.services
 
 import il.ac.afeka.cloud.rsocketmessagesmicroservice.boundaries.MessageBoundary
+import il.ac.afeka.cloud.rsocketmessagesmicroservice.boundaries.SenderAndTargetBoundary
 import il.ac.afeka.cloud.rsocketmessagesmicroservice.boundaries.TargetBoundary
 import il.ac.afeka.cloud.rsocketmessagesmicroservice.crud.RSocketCrud
 import il.ac.afeka.cloud.rsocketmessagesmicroservice.exceptions.BadRequestException
@@ -23,6 +24,7 @@ class RSocketServiceImp(
             .flatMap {
                 it.id = null
                 it.publicationTimestamp = Date().toString()
+                // LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
 
                 if (it.urgent == null) {
                     it.urgent = false
@@ -47,6 +49,7 @@ class RSocketServiceImp(
 
 
     override fun getAll(size: Int, page: Int): Flux<MessageBoundary> {
+
         return this.rSocketCrud
             .findAllByIdNotNull(PageRequest.of(page, size, Sort.Direction.DESC, "publicationTimestamp", "id"))
             .map { MessageBoundary(it) }
@@ -66,6 +69,24 @@ class RSocketServiceImp(
     override fun cleanup(): Mono<Void> {
         return this.rSocketCrud
             .deleteAll()
+            .log()
+    }
+
+    override fun getUrgentMessagesBySenderAndTarget(senderAndTargets: Flux<SenderAndTargetBoundary>): Flux<MessageBoundary> {
+        return senderAndTargets
+            .flatMap {
+                if(!InputValidation.isValidEmail(it.target)) {
+                    Flux.empty()
+                } else {
+                    this.rSocketCrud
+                        .findAllByTargetAndSenderAndUrgentIsTrue(
+                            it.target!!,
+                            it.sender!!,
+                            PageRequest.of(it.page, it.size, Sort.Direction.DESC, "publicationTimestamp", "id")
+                        )
+                        .map { MessageBoundary(it) }
+                }
+            }
             .log()
     }
 }
