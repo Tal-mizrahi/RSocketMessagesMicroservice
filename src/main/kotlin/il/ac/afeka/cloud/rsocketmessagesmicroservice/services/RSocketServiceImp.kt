@@ -11,6 +11,8 @@ import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -23,8 +25,8 @@ class RSocketServiceImp(
         return Mono.just(message)
             .flatMap {
                 it.id = null
-                it.publicationTimestamp = Date().toString()
-                // LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+                it.publicationTimestamp = ZonedDateTime.now()
+                   .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ"))
 
                 if (it.urgent == null) {
                     it.urgent = false
